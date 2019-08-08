@@ -1,99 +1,35 @@
-# Kubernetes plugin for drone.io [![Docker Repository on Quay](https://quay.io/repository/honestbee/drone-kubernetes/status "Docker Repository on Quay")](https://quay.io/repository/honestbee/drone-kubernetes)
+# Kubernetes plugin for drone.io 
 
-This plugin allows to update a Kubernetes deployment.
+This is an adaptation from [honestbee/drone-kubernetes](https://github.com/honestbee/drone-kubernetes) drone plugin,
+which allows to execute a remote command in a container inside a pod 
+
 
 ## Usage  
 
-This pipeline will update the `my-deployment` deployment with the image tagged `DRONE_COMMIT_SHA:0:8`
+This pipeline will execute the command  `echo hello world` inside the pod `pod1` in the container with name 
+`my-container`
 
 ```yaml
-    pipeline:
-        deploy:
-            image: quay.io/honestbee/drone-kubernetes
-            deployment: my-deployment
-            repo: myorg/myrepo
-            container: my-container
-            tag: 
-                - mytag
-                - latest
-```
-
-Deploying containers across several deployments, eg in a scheduler-worker setup. Make sure your container `name` in your manifest is the same for each pod.
-    
-```yaml
-    pipeline:
-        deploy:
-            image: quay.io/honestbee/drone-kubernetes
-            deployment: [server-deploy, worker-deploy]
-            repo: myorg/myrepo
-            container: my-container
-            tag:                 
-                - mytag
-                - latest
-```
-
-Deploying multiple containers within the same deployment.
-
-```yaml
-    pipeline:
-        deploy:
-            image: quay.io/honestbee/drone-kubernetes
-            deployment: my-deployment
-            repo: myorg/myrepo
-            container: [container1, container2]
-            tag:                 
-                - mytag
-                - latest
-```
-
-**NOTE**: Combining multi container deployments across multiple deployments is not recommended
-
-This more complex example demonstrates how to deploy to several environments based on the branch, in a `app` namespace 
-
-```yaml
-    pipeline:
-        deploy-staging:
-            image: quay.io/honestbee/drone-kubernetes
-            kubernetes_server: ${KUBERNETES_SERVER_STAGING}
-            kubernetes_cert: ${KUBERNETES_CERT_STAGING}
-            kubernetes_token: ${KUBERNETES_TOKEN_STAGING}
-            deployment: my-deployment
-            repo: myorg/myrepo
-            container: my-container
-            namespace: app
-            tag:                 
-                - mytag
-                - latest
-            when:
-                branch: [ staging ]
-
-        deploy-prod:
-            image: quay.io/honestbee/drone-kubernetes
-            kubernetes_server: ${KUBERNETES_SERVER_PROD}
-            kubernetes_token: ${KUBERNETES_TOKEN_PROD}
-            # notice: no tls verification will be done, warning will is printed
-            deployment: my-deployment
-            repo: myorg/myrepo
-            container: my-container
-            namespace: app
-            tag:                 
-                - mytag
-                - latest
-            when:
-                branch: [ master ]
+steps:
+    - name execute_command:
+      image: contraslash/drone-kubernetes-command-in-pod
+      pod_name: "pod1"
+      container_name: "my-container"
+      container_command: "echo hello world"
+      secrets: [KUBERNETES_CLIENT_CERTIFICATE, KUBERNETES_CLIENT_KEY, KUBERNETES_SERVER]
 ```
 
 ## Required secrets
 
 ```bash
-    drone secret add --image=honestbee/drone-kubernetes \
-        your-user/your-repo KUBERNETES_SERVER https://mykubernetesapiserver
+drone secret add --image=honestbee/drone-kubernetes \
+    your-user/your-repo KUBERNETES_SERVER https://mykubernetesapiserver
 
-    drone secret add --image=honestbee/drone-kubernetes \
-        your-user/your-repo KUBERNETES_CERT <base64 encoded CA.crt>
+drone secret add --image=honestbee/drone-kubernetes \
+    your-user/your-repo KUBERNETES_CERT <base64 encoded CA.crt>
 
-    drone secret add --image=honestbee/drone-kubernetes \
-        your-user/your-repo KUBERNETES_TOKEN eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJ...
+drone secret add --image=honestbee/drone-kubernetes \
+    your-user/your-repo KUBERNETES_TOKEN eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJ...
 ```
 
 When using TLS Verification, ensure Server Certificate used by kubernetes API server 
