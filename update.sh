@@ -55,16 +55,9 @@ kubectl config use-context default
 #kubectl get nodes
 
 kubectl version
-IFS=',' read -r -a DEPLOYMENTS <<< "${PLUGIN_DEPLOYMENT}"
-IFS=',' read -r -a CONTAINERS <<< "${PLUGIN_CONTAINER}"
-for DEPLOY in ${DEPLOYMENTS[@]}; do
-  echo Deploying to $KUBERNETES_SERVER
-  for CONTAINER in ${CONTAINERS[@]}; do
-    if [[ ${PLUGIN_FORCE} == "true" ]]; then
-      kubectl -n ${PLUGIN_NAMESPACE} set image deployment/${DEPLOY} \
-        ${CONTAINER}=${PLUGIN_REPO}:${PLUGIN_TAG}FORCE
-    fi
-    kubectl -n ${PLUGIN_NAMESPACE} set image deployment/${DEPLOY} \
-      ${CONTAINER}=${PLUGIN_REPO}:${PLUGIN_TAG} --record
-  done
-done
+env
+SELECTED_POD=$(kubectl get pods | grep ${PLUGIN_POD_NAME} -m 1 | awk '{print $1}')
+echo "${SELECTED_POD}"
+echo "EXECUTING: kubectl exec -it ${SELECTED_POD} -c ${PLUGIN_CONTAINER_NAME} ${PLUGIN_CONTAINER_COMMAND}"
+kubectl exec -it ${SELECTED_POD} -c ${PLUGIN_CONTAINER_NAME} ${PLUGIN_CONTAINER_COMMAND}
+
