@@ -56,7 +56,7 @@ kubectl config use-context default
 
 kubectl version
 env
-echo kubectl get pods | grep ${PLUGIN_POD_NAME} -m 1 | awk '{print $1}'
+echo kubectl get pods | grep "${PLUGIN_POD_NAME}" -m 1 | awk '{print $1}'
 SELECTED_POD=$(kubectl get pods | grep "${PLUGIN_POD_NAME}" -m 1 | awk '{print $1}')
 echo "${SELECTED_POD}"
 echo "EXECUTING: kubectl exec -it ${SELECTED_POD} -c ${PLUGIN_CONTAINER_NAME} ${PLUGIN_CONTAINER_COMMAND}"

@@ -19,6 +19,24 @@ steps:
       secrets: [KUBERNETES_CLIENT_CERTIFICATE, KUBERNETES_CLIENT_KEY, KUBERNETES_SERVER]
 ```
 
+
+For the usage with drone 1 +
+
+```yaml
+  - name: migrate_test_new_cluster
+    image: contraslash/drone-kubernetes-command-in-pod
+    settings:
+      pod_name: "pod1"
+      container_name: "my-container"
+      container_command:  "echo hello world"
+      tag: "${DRONE_COMMIT_SHA:0:8}"
+      KUBERNETES_CLIENT_CERTIFICATE:
+        from_secret: KUBERNETES_CLIENT_CERTIFICATE
+      KUBERNETES_CLIENT_KEY:
+        from_secret: KUBERNETES_CLIENT_KEY
+      KUBERNETES_SERVER:
+       from_secret: KUBERNETES_SERVER
+```
 ## Required secrets
 
 ```bash
