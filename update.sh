@@ -61,8 +61,8 @@ kubectl get pods
 echo "=========="
 kubectl get pods --field-selector=status.phase==Running --sort-by=.status.startTime | tail -r
 echo "=========="
-echo kubectl get pods --field-selector=status.phase==Running --sort-by=.status.startTime | tail -r |grep "${PLUGIN_POD_NAME}" -m 1 |  awk '{print $1}'
-SELECTED_POD=$(kubectl get pods --field-selector=status.phase==Running | grep "${PLUGIN_POD_NAME}" -m 1 | awk '{print $1}')
+echo kubectl get pods --field-selector=status.phase==Running --sort-by=.status.startTime | tac | grep "${PLUGIN_POD_NAME}" -m 1 |  awk '{print $1}'
+SELECTED_POD=$(kubectl get pods --field-selector=status.phase==Running --sort-by=.status.startTime | tac | grep "${PLUGIN_POD_NAME}" -m 1 | awk '{print $1}')
 echo "${SELECTED_POD}"
 echo "EXECUTING: kubectl exec -it ${SELECTED_POD} -c ${PLUGIN_CONTAINER_NAME} ${PLUGIN_CONTAINER_COMMAND}"
 kubectl exec -it ${SELECTED_POD} -c ${PLUGIN_CONTAINER_NAME} ${PLUGIN_CONTAINER_COMMAND}
